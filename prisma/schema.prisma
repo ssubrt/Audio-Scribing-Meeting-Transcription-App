@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified Boolean?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  recordings    Recording[] // ✅ Link to recordings
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id           String    @id @default(cuid())
+  userId       String
+  accountId    String
+  providerId   String
+  accessToken  String?
+  refreshToken String?
+  expiresAt    DateTime?
+  password     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+// ✅ NEW: Recording model for session persistence
+model Recording {
+  id          String   @id @default(cuid())
+  sessionId   String   @unique // e.g., "session-1234567890"
+  userId      String   // Link to user who recorded
+  
+  // File information
+  filePath    String?  // Path to .webm file or S3 URL
+  fileSize    Int?     // Size in bytes
+  duration    Int?     // Duration in seconds
+  mimeType    String   @default("audio/webm")
+  
+  // Transcription results
+  transcript  String?  @db.Text // Full near-verbatim transcription
+  summary     String?  @db.Text // AI-generated summary
+  liveTranscript String? @db.Text // Accumulated live chunks
+  
+  // Status tracking
+  status      RecordingStatus @default(RECORDING)
+  
+  // Timestamps
+  startedAt   DateTime @default(now())
+  endedAt     DateTime?
+  processedAt DateTime?
+  
+  // Metadata
+  errorMessage String? @db.Text
+  geminiTokensUsed Int?
+  processingTimeMs Int?
+  chunkCount   Int     @default(0) // Number of chunks processed
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([sessionId])
+  @@index([status])
+  @@map("recording")
+}
+
+enum RecordingStatus {
+  RECORDING    // Currently recording
+  PROCESSING   // Uploading to Gemini for final summary
+  COMPLETED    // Successfully transcribed and summarized
+  FAILED       // Error occurred
+  PAUSED       // User paused (optional)
+}

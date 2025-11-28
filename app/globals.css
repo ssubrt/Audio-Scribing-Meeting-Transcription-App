@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+:root {
+  --background: #030712; /* Deep dark blue/black */
+  --foreground: #f8fafc;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  
+  /* Add custom animations */
+  --animate-blob: blob 7s infinite;
+}
+
+/* Custom Animation Keyframes */
+@keyframes blob {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  /* Hide scrollbar for cleaner look, but allow scrolling */
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+}
+
+/* Selection color */
+::selection {
+  background-color: #8b5cf6; /* Violet */
+  color: white;
+}
+
+/* Utility for glassmorphism cards */
+.glass-card {
+  @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
+}
