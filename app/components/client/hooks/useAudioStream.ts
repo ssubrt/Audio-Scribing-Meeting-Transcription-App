@@ -3,7 +3,7 @@ import { useMachine } from '@xstate/react';
 import { io, Socket } from 'socket.io-client';
 import { recorderMachine } from '../machines/recorderMachine';
 
-const SOCKET_URL = 'http://localhost:4000'; // Adjust if needed
+const SOCKET_URL = 'https://audio-scribing-meeting-transcription-app.onrender.com'; // Adjust if needed
 
 // ✅ IMPROVEMENT: Constants for better maintainability
 const CHUNK_INTERVAL_MS = 1000; // How often to send audio chunks
