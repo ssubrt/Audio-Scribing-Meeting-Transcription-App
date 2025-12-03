@@ -19,14 +19,14 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: "https://audio-scribing-meeting-transcriptio.vercel.app",
   credentials: true
 }));
 
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", 
+    origin: "https://audio-scribing-meeting-transcriptio.vercel.app", 
     methods: ["GET", "POST"],
     credentials: true
   },
